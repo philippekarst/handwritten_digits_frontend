@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { MouseEventHandler, useEffect, useRef, useState } from 'react';
 import './App.css';
 import 'js-draw/bundledStyles';
 import { Editor, Rect2 } from 'js-draw';
@@ -8,47 +8,78 @@ import { FabricJSCanvas, useFabricJSEditor } from 'fabricjs-react'
 
 function App() {
   const { editor, onReady } = useFabricJSEditor()
-
+  const [ submitted, setSubmitted ] = useState(false);
+  
   if (editor) {
     editor.canvas.isDrawingMode = true;
     editor.canvas.setHeight(600);
     editor.canvas.setWidth(600);
-    editor.canvas.freeDrawingBrush.width = 10;
+    editor.canvas.freeDrawingBrush.width = 30;
+    editor.canvas.freeDrawingBrush.color = 'white';
+  }
+
+  const onSubmit = () => {
+    if (!editor) {
+      return;
+    }
+    editor.canvas.setBackgroundColor('black', () => {
+      const canvas = editor.canvas;
+      const data = canvas.toDataURL({format: 'png'})
+
+
+      const tempCanvas = document.createElement('canvas');
+      const tempCtx = tempCanvas.getContext('2d');
+      tempCanvas.width = 28;
+      tempCanvas.height = 28;
+
+      // Create an image element from the data URL
+      const img = new Image();
+      img.onload = () => {
+        if (!tempCtx) {
+          return;
+        }
+        // Draw the image onto the temporary canvas, resizing it to 28x28 pixels
+        tempCtx.drawImage(img, 0, 0, 28, 28);
+
+        // Get the resized image data
+        const resizedData = tempCanvas.toDataURL('image/png');
+        console.log(resizedData);
+        setSubmitted(true);
+      };
+      img.src = data;
+      //const decodedBytes = decodebase64(data);
+
+      //console.log(data);
+    })
+  }
+
+  const onReset = () => {
+    if (!editor) {
+      return;
+    }
+    editor.canvas.clear();
+    setSubmitted(false);
   }
 
   const canvasRef = useRef(null);
 
-  // useEffect(() => {
-  //   const editor = initializeDraw(canvasRef.current as any );
-  //   return () => {
-  //     destroyEditor(editor);
-  //   };
-  // }, []);
-
   return (
     <div className="App">
+      <div className='header'><span>Handwritten digit recognition</span></div>
       <FabricJSCanvas className="drawwrapper" onReady={onReady} />
+      <div className='buttonWrapper'>
+        <button disabled={submitted} onClick={onSubmit} className={!submitted ? 'submitButton' : 'disabledSubmitButton'}>Submit</button>
+        {submitted && <button onClick={onReset} className='resetButton'>Reset</button>}
+      </div>
+      
     </div>
   );
 }
 
-// function initializeDraw(htmlElement: HTMLElement) {
-//   console.log('element', htmlElement);
-//   const editor = new Editor(htmlElement);
-
-//   // editor.loadFromSVG(`
-//   //   <svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600"">
-//   //     <rect width="600" height="600"/>
-//   //   </svg>
-//   // `);
-
-//   return editor;
-// }
-
-// function destroyEditor(editor: Editor) {
-//   if (editor){
-//     editor.remove(); 
-//   }
+// function decodebase64(base64: string) {
+//   const data = base64.split(',')[1];
+//   var decodedBytes = atob(data);
+//   return decodedBytes;
 // }
 
 export default App;
