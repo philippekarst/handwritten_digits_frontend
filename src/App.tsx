@@ -47,9 +47,6 @@ function App() {
         setSubmitted(true);
       };
       img.src = data;
-      //const decodedBytes = decodebase64(data);
-
-      //console.log(data);
     })
   }
 
@@ -75,11 +72,5 @@ function App() {
     </div>
   );
 }
-
-// function decodebase64(base64: string) {
-//   const data = base64.split(',')[1];
-//   var decodedBytes = atob(data);
-//   return decodedBytes;
-// }
 
 export default App;
