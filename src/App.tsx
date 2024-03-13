@@ -1,10 +1,7 @@
-import { MouseEventHandler, useEffect, useRef, useState } from 'react';
+import { FabricJSCanvas, useFabricJSEditor } from 'fabricjs-react';
+import { useRef, useState } from 'react';
+import axios from 'axios';
 import './App.css';
-import 'js-draw/bundledStyles';
-import { Editor, Rect2 } from 'js-draw';
-import { SimpleDrawingBoard, create } from "simple-drawing-board";
-import { Canvas } from 'fabric/fabric-impl';
-import { FabricJSCanvas, useFabricJSEditor } from 'fabricjs-react'
 
 function App() {
   const { editor, onReady } = useFabricJSEditor()
@@ -43,6 +40,13 @@ function App() {
 
         // Get the resized image data
         const resizedData = tempCanvas.toDataURL('image/png');
+        axios.post('http://localhost:8000/recognize-digit/', {
+          image_base64 : resizedData
+        }).then(r=>{
+          console.log(JSON.stringify(r))
+        }).catch(e => {
+          console.log(JSON.stringify(e))
+        })
         console.log(resizedData);
         setSubmitted(true);
       };
